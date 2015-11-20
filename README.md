@@ -8,7 +8,8 @@ Useful links:
 
 1. https://cloud.google.com/storage/docs/json_api/v1/how-tos/upload#resumable
 2. https://cloud.google.com/storage/docs/access-control
-3. 3. https://cloud.google.com/storage/docs/json_api/v1/#Objects
+3. https://cloud.google.com/storage/docs/json_api/v1/#Objects
+4. https://github.com/GoogleCloudPlatform/gcloud-node#google-cloud-storage
 
 ## Workflow
 
