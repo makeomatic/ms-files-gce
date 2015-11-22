@@ -20,7 +20,8 @@
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
     "gcloud": "^0.25.0",
-    "gcs-resumable-upload": "^0.2.2"
+    "gcs-resumable-upload": "^0.2.2",
+    "ms-files-transport": "^0.1.0"
   },
   "devDependencies": {
     "babel": "^5.8.34",

@@ -143,7 +143,6 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * Initializes resumable upload
    * @param  {Object} opts
    * @param  {String} opts.filename
-   * @param  {Number} opts.generation
    * @param  {Object} opts.metadata
    * @param  {String} opts.metadata.contentLength
    * @param  {String} opts.metadata.contentType - must be included
