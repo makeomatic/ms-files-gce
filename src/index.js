@@ -107,7 +107,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    *                          * Be sure to copy the HTTP request path literally: that is, you should include all URL encoding (percent signs) in the string that you create. Also, be sure that you include only query string parameters that designate subresources (such as cors). You should not include query string parameters such as ?prefix, ?max-keys, ?marker, and ?delimiter.
    * @param {String} [md5] - md5 digest of content - Optional. The MD5 digest value in base64. If you provide this in the string,
    *                 the client (usually a browser) must provide this HTTP header with this same value in its request.
-   * @param {Number} expires   This is the timestamp (represented as the number of seconds since the Unix Epoch of 00:00:00 UTC on January 1, 1970)
+   * @param {Number} expires   This is the timestamp (represented as the number of miliseconds since the Unix Epoch of 00:00:00 UTC on January 1, 1970)
    *                            when the signature expires
    * @param {String} [extensionHeaders] :
    *        									 You construct the Canonical Extension Headers portion of the message by concatenating all extension (custom) headers that begin
