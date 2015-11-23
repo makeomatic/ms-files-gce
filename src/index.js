@@ -186,4 +186,16 @@ module.exports = class GCETransport extends AbstractFileTransfer {
       .on('end', opts.onEnd);
   }
 
+  /**
+   * Tells whether file exists or not
+   * @param  {String} filename
+   * @return {Promise}
+   */
+  exists(filename) {
+    const file = this.bucket(filename);
+    return Promise.fromNode(next => {
+      file.exists(next);
+    });
+  }
+
 };
