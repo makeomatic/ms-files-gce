@@ -47,7 +47,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   setupGCE() {
     const gce = this._gce = gcloud(this._config.gce);
-    this._gcs = Promise.promosifyAll(gce.storage(), { multiArgs: true });
+    this._gcs = Promise.promisifyAll(gce.storage(), { multiArgs: true });
   }
 
   /**
