@@ -33,13 +33,32 @@ module.exports = class GCETransport extends AbstractFileTransfer {
       // specify bucket
       name: 'must-be-a-valid-bucket-name',
       host: 'storage.cloud.google.com',
+      metadata: {},
     },
   };
 
   constructor(opts = {}) {
     super();
     this._config = ld.merge({}, GCETransport.defaultOpts, opts);
+
+    if (this._config.logger) {
+      this._logger = this._config.logger;
+    } else {
+      [ 'trace', 'debug', 'info', 'warn', 'error', 'fatal' ].reduce((acc, act) => {
+        acc[act] = ld.noop;
+        return acc;
+      }, (this._logger = {}));
+    }
+
     this.setupGCE();
+  }
+
+  /**
+   * Returns logger or noop
+   * @return {[type]} [description]
+   */
+  get log() {
+    return this._logger;
   }
 
   /**
@@ -59,17 +78,24 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   createBucket(query) {
     const gcs = this._gcs;
     const needle = this._config.bucket.name;
+
+    this.log.debug('initiating createBucket: %s', needle);
+
     return gcs.getBucketsAsync(query)
       .spread((buckets, nextQuery) => {
+        this.log.debug('retrieved buckets:', buckets);
+
         const bucket = ld.findWhere(buckets, { name: needle });
         if (bucket) {
           return bucket;
         }
 
+        this.log.debug('not found, next query:', nextQuery);
         if (nextQuery) {
           return this.createBucket(nextQuery);
         }
 
+        this.log.debug('creating bucket', needle, this._config.bucket.metadata);
         return gcs.createBucketAsync(needle, this._config.bucket.metadata);
       });
   }
@@ -126,6 +152,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   createSignedURL(opts) {
+    this.log.debug('initiating signing of URL for %s', opts.resource);
+
     const { action, md5, type, expires, extensionHeaders, resource } = opts;
     const file = this.bucket(resource);
     return Promise.fromNode(next => {
@@ -152,10 +180,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   initResumableUpload(opts) {
     const { filename, metadata, generation } = opts;
-    // const file = this.bucket(filename);
-    // return Promise.fromNode(next => {
-    //   file.createResumableUpload(metadata, next);
-    // });
+    this.log.debug('initiating resumable upload of %s', filename);
 
     return MMResumableUpload.createURIAsync({
       authClient: this.bucket.storage.authClient,
@@ -178,6 +203,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @param {Function} opts.onEnd      - fired when transfer is completed
    */
   readFile(filename, opts) {
+    this.log.debug('initiating read of %s', filename);
+
     const file = this.bucket(filename);
     return file.createReadStream({ start: opts.start || 0, end: opts.end || undefined })
       .on('error', opts.onError)
@@ -192,6 +219,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   exists(filename) {
+    this.log.debug('initiating exists check of %s', filename);
+
     const file = this.bucket(filename);
     return Promise.fromNode(next => {
       file.exists(next);
