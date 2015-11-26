@@ -83,15 +83,14 @@ module.exports = class GCETransport extends AbstractFileTransfer {
 
     return gcs.getBucketsAsync(query)
       .spread((buckets, nextQuery) => {
-        this.log.debug('retrieved buckets:', buckets);
-
         const bucket = ld.findWhere(buckets, { name: needle });
         if (bucket) {
+          this.log.debug('found existing bucket');
           return bucket;
         }
 
-        this.log.debug('not found, next query:', nextQuery);
         if (nextQuery) {
+          this.log.debug('not found, next query:', nextQuery);
           return this.createBucket(nextQuery);
         }
 
