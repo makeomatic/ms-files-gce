@@ -240,4 +240,17 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     });
   }
 
+  /**
+   * Removes file from bucket
+   * @param  {String} filename
+   * @return {Promise}
+   */
+  remove(filename) {
+    this.log.debug('removing file %s', filename);
+    const file = this.bucket(filename);
+    return Promise.fromNode(next => {
+      file.delete(next);
+    });
+  }
+
 };
