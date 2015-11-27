@@ -167,9 +167,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     this.log.debug('initiating signing of URL for %s', opts.resource);
 
     const { action, md5, type, expires, extensionHeaders, resource } = opts;
-    const { bucket } = this;
 
-    const file = bucket(resource);
+    const file = this.bucket.file(resource);
     return Promise.fromNode(next => {
       file.getSignedUrl({
         action,
@@ -219,8 +218,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   readFile(filename, opts) {
     this.log.debug('initiating read of %s', filename);
-    const { bucket } = this;
-    const file = bucket(filename);
+    const file = this.bucket.file(filename);
     return file.createReadStream({ start: opts.start || 0, end: opts.end || undefined })
       .on('error', opts.onError)
       .on('response', opts.onResponse)
@@ -235,8 +233,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   exists(filename) {
     this.log.debug('initiating exists check of %s', filename);
-    const { bucket } = this;
-    const file = bucket(filename);
+    const file = this.bucket.file(filename);
     return Promise.fromNode(next => {
       file.exists(next);
     });
@@ -249,8 +246,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   remove(filename) {
     this.log.debug('removing file %s', filename);
-    const { bucket } = this;
-    const file = bucket(filename);
+    const file = this.bucket.file(filename);
     return Promise.fromNode(next => {
       file.delete(next);
     });
