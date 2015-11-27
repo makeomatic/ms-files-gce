@@ -3,6 +3,7 @@ const gcloud = require('gcloud');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
 const ResumableUpload = Promise.promisifyAll(require('gcs-resumable-upload'));
+const Errors = require('common-errors');
 
 /**
  * Extends class, so that if we have contentLength metadata header - it's included in the request options
@@ -15,7 +16,19 @@ class MMResumableUpload extends ResumableUpload {
       reqOpts.headers = headers;
     }
 
-    super.makeRequest(reqOpts, callback);
+    super.makeRequest(reqOpts, function processResponse(err, resp, body) {
+      if (err) {
+        if (err instanceof Error) {
+          return callback(err);
+        }
+
+        const error = new Errors.Error(err.message);
+        Object.assign(error, err);
+        return callback(err);
+      }
+
+      callback(null, resp, body);
+    });
   }
 }
 
