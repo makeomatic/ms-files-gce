@@ -2,35 +2,35 @@ const Promise = require('bluebird');
 const gcloud = require('gcloud');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
-const ResumableUpload = Promise.promisifyAll(require('gcs-resumable-upload'));
+const ResumableUpload = require('gcs-resumable-upload');
+Promise.promisifyAll(ResumableUpload.prototype);
 const Errors = require('common-errors');
 
 /**
- * Extends class, so that if we have contentLength metadata header - it's included in the request options
+ * Monkey patch module
  */
-class MMResumableUpload extends ResumableUpload {
-  makeRequest(reqOpts, callback) {
-    if (this.metadata.contentLength) {
-      const headers = reqOpts.headers || {};
-      headers['X-Upload-Content-Length'] = this.metadata.contentLength;
-      reqOpts.headers = headers;
-    }
+const makeRequest = ResumableUpload.prototype.makeRequest;
+ResumableUpload.prototype.makeRequest = function resumableUploadRequest(reqOpts, callback) {
+  if (this.metadata.contentLength) {
+    const headers = reqOpts.headers || {};
+    headers['X-Upload-Content-Length'] = this.metadata.contentLength;
+    reqOpts.headers = headers;
+  }
 
-    super.makeRequest(reqOpts, function processResponse(err, resp, body) {
-      if (err) {
-        if (err instanceof Error) {
-          return callback(err);
-        }
-
-        const error = new Errors.Error(err.message);
-        Object.assign(error, err);
+  makeRequest.call(this, reqOpts, function processResponse(err, resp, body) {
+    if (err) {
+      if (err instanceof Error) {
         return callback(err);
       }
 
-      callback(null, resp, body);
-    });
-  }
-}
+      const error = new Errors.Error(err.message);
+      Object.assign(error, err);
+      return callback(error);
+    }
+
+    callback(null, resp, body);
+  });
+};
 
 /**
  * Main transport class
@@ -193,14 +193,15 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   initResumableUpload(opts) {
     const { filename, metadata, generation } = opts;
     this.log.debug('initiating resumable upload of %s', filename);
-
-    return MMResumableUpload.createURIAsync({
+    const upload = new ResumableUpload({
       authClient: this.bucket.storage.authClient,
       bucket: this.bucket.name,
       file: filename,
       generation,
       metadata,
     });
+
+    return upload.createURIAsync();
   }
 
   /**
