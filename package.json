@@ -4,9 +4,9 @@
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
-    "compile": "if [[ $NODE_ENV != \"production\" ]]; then ./node_modules/.bin/babel -d ./lib --optional es7.objectRestSpread,es7.classProperties,es7.decorators ./src; fi",
+    "compile": "./node_modules/.bin/babel -d ./lib ./src",
     "prepublish": "npm run compile",
-    "test": "./node_modules/.bin/mocha --require ./test/babelhook.js --bail -R spec"
+    "test": "echo 'no test preset' && exit 1"
   },
   "repository": {
     "type": "git",
@@ -19,18 +19,17 @@
   },
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
-    "gcloud": "^0.25.0",
-    "gcs-resumable-upload": "^0.2.2",
+    "gcloud": "^0.26.1",
+    "gcs-resumable-upload": "^0.3.0",
     "ms-files-transport": "^0.1.0"
   },
   "devDependencies": {
-    "babel": "^5.8.34",
-    "babel-core": "^5.8.33",
+    "babel-cli": "^6.3.17",
     "babel-eslint": "^4.1.5",
     "bunyan": "^1.5.1",
     "chai": "^3.4.1",
     "eslint": "^1.8.0",
-    "eslint-config-airbnb": "^1.0.0",
+    "eslint-config-airbnb": "^2.1.1",
     "eslint-plugin-mocha": "^1.1.0",
     "eslint-plugin-react": "^3.9.0",
     "json": "^9.0.3",
