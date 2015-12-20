@@ -219,11 +219,26 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   readFile(filename, opts) {
     this.log.debug('initiating read of %s', filename);
     const file = this.bucket.file(filename);
-    return file.createReadStream({ start: opts.start || 0, end: opts.end || undefined })
-      .on('error', opts.onError)
-      .on('response', opts.onResponse)
-      .on('data', opts.onData)
-      .on('end', opts.onEnd);
+    const stream = file.createReadStream({ start: opts.start || 0, end: opts.end || undefined });
+    const { onError, onResponse, onData, onEnd } = opts;
+    
+    if (onError) {
+      stream.on('error', opts.onError);
+    }
+    
+    if (onResponse) {
+      stream.on('response', opts.onResponse);
+    }
+    
+    if (onData) {
+      stream.on('data', opts.onData);
+    }
+    
+    if (onEnd) {
+      stream.on('end', opts.onEnd);
+    }
+    
+    return stream;
   }
 
   /**
