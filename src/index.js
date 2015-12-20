@@ -57,7 +57,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     if (this._config.logger) {
       this._logger = this._config.logger;
     } else {
-      [ 'trace', 'debug', 'info', 'warn', 'error', 'fatal' ].reduce((acc, act) => {
+      ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].reduce((acc, act) => {
         acc[act] = ld.noop;
         return acc;
       }, (this._logger = {}));
@@ -206,7 +206,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   }
 
   /**
-   * Download file
+   * Download file/stream
    * @param {String} filename - what do we want to download
    * @param {Object} opts
    * @param {Number} [opts.start]
@@ -216,29 +216,42 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @param {Function} opts.onData     - returns data chunks
    * @param {Function} opts.onEnd      - fired when transfer is completed
    */
-  readFile(filename, opts) {
+  readFileStream(filename, opts) {
     this.log.debug('initiating read of %s', filename);
     const file = this.bucket.file(filename);
     const stream = file.createReadStream({ start: opts.start || 0, end: opts.end || undefined });
     const { onError, onResponse, onData, onEnd } = opts;
-    
+
     if (onError) {
       stream.on('error', opts.onError);
     }
-    
+
     if (onResponse) {
       stream.on('response', opts.onResponse);
     }
-    
+
     if (onData) {
       stream.on('data', opts.onData);
     }
-    
+
     if (onEnd) {
       stream.on('end', opts.onEnd);
     }
-    
+
     return stream;
+  }
+
+  /**
+   * Download file
+   * @param {String} filename - what do we want to download
+   * @param {Object} opts
+   * @return {Promise}
+   */
+  readFile(filename, opts) {
+    const file = this.bucket.file(filename);
+    return Promise.fromNode(next => {
+      file.download(opts, next);
+    });
   }
 
   /**
