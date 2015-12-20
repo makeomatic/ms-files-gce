@@ -5,6 +5,7 @@ const ld = require('lodash');
 const ResumableUpload = require('gcs-resumable-upload');
 Promise.promisifyAll(ResumableUpload.prototype);
 const Errors = require('common-errors');
+const bl = require('bl');
 
 /**
  * Monkey patch module
@@ -248,9 +249,17 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   readFile(filename, opts) {
-    const file = this.bucket.file(filename);
     return Promise.fromNode(next => {
-      file.download(opts, next);
+      let response = null;
+      this.readFileStream(filename, opts)
+        .on('response', httpResponse => response = httpResponse)
+        .pipe(bl((err, contents) => {
+          if (err) {
+            return next(err);
+          }
+
+          next(null, { response, contents });
+        }));
     });
   }
 
