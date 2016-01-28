@@ -252,7 +252,9 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     return Promise.fromNode(next => {
       let response = null;
       this.readFileStream(filename, opts)
-        .on('response', httpResponse => response = httpResponse)
+        .on('response', httpResponse => {
+          response = httpResponse;
+        })
         .pipe(bl((err, contents) => {
           if (err) {
             return next(err);
