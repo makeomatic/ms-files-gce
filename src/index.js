@@ -138,12 +138,19 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @param {String="read","write","delete"} action
    * @param {String} [type]   Content-Type, do not supply for downloads
    * @param {String} resource `/path/to/objectname/without/bucket`
-   *                          You construct the Canonicalized_Resource portion of the message by concatenating the resource path (bucket and object and subresource) that the request is acting on. To do this, you can use the following process:
+   *                          You construct the Canonicalized_Resource portion of the message by concatenating the resource path
+   *                          (bucket and object and subresource) that the request is acting on. To do this, you can use the following process:
    *                          * Begin with an empty string.
-   *                          * If the bucket name appears in the Host header, add a slash and the bucket name to the string (for example, /example-travel-maps). If the bucket name appears in the path portion of the HTTP request, do nothing.
-   *                          * Add the path portion of the HTTP request to the string, excluding any query string parameters. For example, if the path is /europe/france/paris.jpg?cors and you already added the bucket example-travel-maps to the string, then you need to add /europe/france/paris.jpg to the string.
-   *                          * If the request is scoped to a subresource, such as ?cors, add this subresource to the string, including the question mark.
-   *                          * Be sure to copy the HTTP request path literally: that is, you should include all URL encoding (percent signs) in the string that you create. Also, be sure that you include only query string parameters that designate subresources (such as cors). You should not include query string parameters such as ?prefix, ?max-keys, ?marker, and ?delimiter.
+   *                          * If the bucket name appears in the Host header, add a slash and the bucket name to the string (for example,
+   *                          /example-travel-maps). If the bucket name appears in the path portion of the HTTP request, do nothing.
+   *                          * Add the path portion of the HTTP request to the string, excluding any query string parameters. For example,
+   *                          if the path is /europe/france/paris.jpg?cors and you already added the bucket example-travel-maps to the string, then you need
+   *                          to add /europe/france/paris.jpg to the string.
+   *                          * If the request is scoped to a subresource, such as ?cors, add this subresource to the string, including the
+   *                          question mark.
+   *                          * Be sure to copy the HTTP request path literally: that is, you should include all URL encoding (percent signs)
+   *                          in the string that you create. Also, be sure that you include only query string parameters that designate
+   *                          subresources (such as cors). You should not include query string parameters such as ?prefix, ?max-keys, ?marker, and ?delimiter.
    * @param {String} [md5] - md5 digest of content - Optional. The MD5 digest value in base64. If you provide this in the string,
    *                 the client (usually a browser) must provide this HTTP header with this same value in its request.
    * @param {Number} expires   This is the timestamp (represented as the number of miliseconds since the Unix Epoch of 00:00:00 UTC on January 1, 1970)
@@ -161,7 +168,10 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    *                           * Remove any whitespace around the colon that appears after the header name.
    *                           * Append a newline (U+000A) to each custom header.
    *                           * Concatenate all custom headers.
-   *                           Important: You must use both the header name and the header value when you construct the Canonical Extension Headers portion of the query string. Be sure to remove any whitespace around the colon that separates the header name and value. For example, using the custom header x-goog-acl: private without removing the space after the colon will return a 403 Forbidden because the request signature you calculate will not match the signature Google calculates.
+   *                           Important: You must use both the header name and the header value when you construct the Canonical Extension Headers portion
+   *                           of the query string. Be sure to remove any whitespace around the colon that separates the header name and value.
+   *                           For example, using the custom header x-goog-acl: private without removing the space after the colon will return a
+   *                           403 Forbidden because the request signature you calculate will not match the signature Google calculates.
    * @return {Promise}
    */
   createSignedURL(opts) {
@@ -221,25 +231,40 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     this.log.debug('initiating read of %s', filename);
     const file = this.bucket.file(filename);
     const stream = file.createReadStream({ start: opts.start || 0, end: opts.end || undefined });
-    const { onError, onResponse, onData, onEnd } = opts;
 
-    if (onError) {
-      stream.on('error', opts.onError);
-    }
-
-    if (onResponse) {
-      stream.on('response', opts.onResponse);
-    }
-
-    if (onData) {
-      stream.on('data', opts.onData);
-    }
-
-    if (onEnd) {
-      stream.on('end', opts.onEnd);
-    }
+    // attach event handles if they are present
+    ['onError', 'onResponse', 'onData', 'onEnd'].forEach(opt => {
+      const thunk = opts[opt];
+      if (typeof thunk === 'function') {
+        stream.on(opt.slice(2).toLowerCase(), thunk);
+      }
+    });
 
     return stream;
+  }
+
+  /**
+   * Makes file publicly accessible
+   * @param  {String} filename
+   * @return {Promise}
+   */
+  makePublic(filename) {
+    return Promise.fromNode(next => {
+      const file = this.bucket.file(filename);
+      file.makePublic(next);
+    });
+  }
+
+  /**
+   * Makes file public
+   * @param  {String} filename
+   * @return {Promise}
+   */
+  makePrivate(filename, options = {}) {
+    return Promise.fromNode(next => {
+      const file = this.bucket.file(filename);
+      file.makePrivate(options, next);
+    });
   }
 
   /**
