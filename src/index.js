@@ -244,6 +244,18 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   }
 
   /**
+   * Upload filestream
+   * @param  {String} filename
+   * @param  {Object} opts
+   * @return {Stream}
+   */
+  writeStream(filename, opts) {
+    this.log.debug('initiating upload of %s', filename);
+    const file = this.bucket.file(filename);
+    return file.createWriteStream(opts);
+  }
+
+  /**
    * Makes file publicly accessible
    * @param  {String} filename
    * @return {Promise}
