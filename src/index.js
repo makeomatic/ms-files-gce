@@ -3,9 +3,20 @@ const gcloud = require('gcloud');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
 const ResumableUpload = require('gcs-resumable-upload');
-Promise.promisifyAll(ResumableUpload.prototype);
 const Errors = require('common-errors');
 const bl = require('bl');
+
+// do promisification
+Promise.promisifyAll(ResumableUpload.prototype);
+
+// multi-args
+Promise.promisifyAll(require('gcloud/lib/storage'), { multiArgs: true });
+Promise.promisifyAll(require('gcloud/lib/storage/bucket'), { multiArgs: true });
+
+// single-arg
+Promise.promisifyAll(require('gcloud/lib/storage/file'), { multiArgs: false });
+Promise.promisifyAll(require('gcloud/lib/storage/channel'), { multiArgs: false });
+Promise.promisifyAll(require('gcloud/lib/storage/acl'), { multiArgs: false });
 
 /**
  * Monkey patch module
@@ -47,6 +58,17 @@ module.exports = class GCETransport extends AbstractFileTransfer {
       // specify bucket
       name: 'must-be-a-valid-bucket-name',
       host: 'storage.cloud.google.com',
+      channel: {
+        // must be persistent in your app to identify the channel
+        id: null,
+        config: {
+          // change to your webhook address
+          address: 'https://localhost:443',
+          // token: this is your `SECRET`, so make sure you set it to something unique for your application and
+          // verify notification
+          token: undefined,
+        },
+      },
       metadata: {},
     },
   };
@@ -80,7 +102,28 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   setupGCE() {
     const gce = this._gce = gcloud(this._config.gce);
-    this._gcs = Promise.promisifyAll(gce.storage(), { multiArgs: true });
+    this._gcs = gce.storage();
+  }
+
+  /**
+   * Creates notification channel
+   */
+  setupChannel() {
+    const bucket = this._bucket;
+    const { id, config } = this._config.bucket.channel;
+
+    if (!id || !config.address) {
+      return null;
+    }
+
+    return bucket.createChannelAsync(id, config)
+      .spread(channel => {
+        this._channel = channel;
+        return channel;
+      })
+      .catch(err => {
+        this.log.error('failed to create channel', err);
+      });
   }
 
   /**
@@ -119,10 +162,14 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   connect() {
-    return this.createBucket()
-      .tap(bucket => {
+    return Promise
+      .bind(this)
+      .then(this.createBucket)
+      .spread(bucket => {
         this._bucket = bucket;
-      });
+        return bucket;
+      })
+      .tap(this.setupChannel);
   }
 
   /**
@@ -180,14 +227,12 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     const { action, md5, type, expires, extensionHeaders, resource } = opts;
 
     const file = this.bucket.file(resource);
-    return Promise.fromNode(next => {
-      file.getSignedUrl({
-        action,
-        expires,
-        contentMd5: md5,
-        contentType: type,
-        extensionHeaders,
-      }, next);
+    return file.getSignedUrlAsync({
+      action,
+      expires,
+      contentMd5: md5,
+      contentType: type,
+      extensionHeaders,
     });
   }
 
@@ -261,10 +306,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   makePublic(filename) {
-    return Promise.fromNode(next => {
-      const file = this.bucket.file(filename);
-      file.makePublic(next);
-    });
+    const file = this.bucket.file(filename);
+    return file.makePublicAsync();
   }
 
   /**
@@ -273,10 +316,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   makePrivate(filename, options = {}) {
-    return Promise.fromNode(next => {
-      const file = this.bucket.file(filename);
-      file.makePrivate(options, next);
-    });
+    const file = this.bucket.file(filename);
+    return file.makePrivateAsync(options);
   }
 
   /**
@@ -310,9 +351,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   exists(filename) {
     this.log.debug('initiating exists check of %s', filename);
     const file = this.bucket.file(filename);
-    return Promise.fromNode(next => {
-      file.exists(next);
-    });
+    return file.existsAsync();
   }
 
   /**
@@ -323,9 +362,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   remove(filename) {
     this.log.debug('removing file %s', filename);
     const file = this.bucket.file(filename);
-    return Promise.fromNode(next => {
-      file.delete(next);
-    });
+    return file.deleteAsync();
   }
 
 };
