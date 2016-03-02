@@ -1,5 +1,4 @@
 const Promise = require('bluebird');
-const gcloud = require('gcloud');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
 const ResumableUpload = require('gcs-resumable-upload');
@@ -9,14 +8,16 @@ const bl = require('bl');
 // do promisification
 Promise.promisifyAll(ResumableUpload.prototype);
 
-// multi-args
-Promise.promisifyAll(require('gcloud/lib/storage'), { multiArgs: true });
-Promise.promisifyAll(require('gcloud/lib/storage/bucket'), { multiArgs: true });
-
 // single-arg
-Promise.promisifyAll(require('gcloud/lib/storage/file'), { multiArgs: false });
-Promise.promisifyAll(require('gcloud/lib/storage/channel'), { multiArgs: false });
-Promise.promisifyAll(require('gcloud/lib/storage/acl'), { multiArgs: false });
+Promise.promisifyAll(require('gcloud/lib/storage/file').prototype);
+Promise.promisifyAll(require('gcloud/lib/storage/channel').prototype);
+
+// multi-args
+Promise.promisifyAll(require('gcloud/lib/storage/bucket').prototype, { multiArgs: true });
+Promise.promisifyAll(require('gcloud/lib/storage').prototype, { multiArgs: true });
+
+// include gcloud
+const gcloud = require('gcloud');
 
 /**
  * Monkey patch module
@@ -108,22 +109,53 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   /**
    * Creates notification channel
    */
-  setupChannel() {
+  setupChannel(resourceId) {
     const bucket = this._bucket;
+    const gcs = this._gcs;
     const { id, config } = this._config.bucket.channel;
 
     if (!id || !config.address) {
+      this.log.warn('incomplete configuration for notification channel');
       return null;
     }
 
-    return bucket.createChannelAsync(id, config)
+    return bucket
+      .createChannelAsync(id, config)
       .spread(channel => {
-        this._channel = channel;
+        this.log.debug('created channel %s', id);
         return channel;
       })
-      .catch(err => {
-        this.log.error('failed to create channel', err);
+      .catch({ code: 400 }, err => {
+        if (ld.get(err, 'errors[0].reason') === 'channelIdNotUnique' && resourceId) {
+          this.log.debug('found existing channel %s - %s', id, resourceId);
+          return gcs.channel(id, resourceId);
+        }
+
+        throw err;
+      })
+      .catch({ code: 401 }, err => {
+        this.log.error('no rights to create channel', err);
+        throw err;
+      })
+      .then(channel => {
+        this._channel = channel;
+        channel.interceptors.push({
+          request: (requestOptions) => {
+            requestOptions.uri = requestOptions.uri.replace(`${id}/`, '');
+            return requestOptions;
+          },
+        });
+        return channel.metadata.resourceId;
       });
+  }
+
+  /**
+   * stops channel
+   */
+  stopChannel() {
+    const channel = this._channel;
+    this.log.debug('destroying channel %j', channel && channel.metadata || '<noop>');
+    return channel && channel.stopAsync() || Promise.resolve();
   }
 
   /**
@@ -138,7 +170,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
 
     this.log.debug('initiating createBucket: %s', needle);
 
-    return gcs.getBucketsAsync(query)
+    return gcs
+      .getBucketsAsync(query)
       .spread((buckets, nextQuery) => {
         const bucket = ld.find(buckets, { name: needle });
         if (bucket) {
@@ -152,7 +185,9 @@ module.exports = class GCETransport extends AbstractFileTransfer {
         }
 
         this.log.debug('creating bucket', needle, this._config.bucket.metadata);
-        return gcs.createBucketAsync(needle, this._config.bucket.metadata);
+        return gcs
+          .createBucketAsync(needle, this._config.bucket.metadata)
+          .get(0);
       });
   }
 
@@ -165,11 +200,10 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     return Promise
       .bind(this)
       .then(this.createBucket)
-      .spread(bucket => {
+      .then(bucket => {
         this._bucket = bucket;
         return bucket;
-      })
-      .tap(this.setupChannel);
+      });
   }
 
   /**

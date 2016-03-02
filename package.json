@@ -1,6 +1,6 @@
 {
   "name": "ms-files-gce",
-  "version": "0.6.0-rc1",
+  "version": "0.6.0",
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
     "bl": "^1.1.2",
+    "bluebird": "^3.3.3",
     "gcloud": "^0.28.0",
     "gcs-resumable-upload": "^0.4.1",
     "ms-files-transport": "^0.1.0"
