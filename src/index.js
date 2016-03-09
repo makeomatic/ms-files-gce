@@ -17,7 +17,7 @@ Promise.promisifyAll(require('gcloud/lib/storage/bucket').prototype, { multiArgs
 Promise.promisifyAll(require('gcloud/lib/storage').prototype, { multiArgs: true });
 
 // include gcloud
-const gcloud = require('gcloud');
+const gstorage = require('gcloud/lib/storage');
 
 /**
  * Monkey patch module
@@ -41,7 +41,7 @@ ResumableUpload.prototype.makeRequest = function resumableUploadRequest(reqOpts,
       return callback(error);
     }
 
-    callback(null, resp, body);
+    return callback(null, resp, body);
   });
 };
 
@@ -102,8 +102,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * Creates authenticated instance of gcloud
    */
   setupGCE() {
-    const gce = this._gce = gcloud(this._config.gce);
-    this._gcs = gce.storage();
+    this._gcs = gstorage(this._config.gce);
   }
 
   /**
@@ -366,7 +365,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
             return next(err);
           }
 
-          next(null, { response, contents });
+          return next(null, { response, contents });
         }));
     });
   }
