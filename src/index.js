@@ -17,7 +17,7 @@ Promise.promisifyAll(require('gcloud/lib/storage/bucket').prototype, { multiArgs
 Promise.promisifyAll(require('gcloud/lib/storage').prototype, { multiArgs: true });
 
 // include gcloud
-const gstorage = require('gcloud/lib/storage');
+const GStorage = require('gcloud/lib/storage');
 
 /**
  * Monkey patch module
@@ -102,7 +102,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * Creates authenticated instance of gcloud
    */
   setupGCE() {
-    this._gcs = gstorage(this._config.gce);
+    this._gcs = new GStorage(this._config.gce);
   }
 
   /**
