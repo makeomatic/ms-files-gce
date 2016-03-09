@@ -139,12 +139,6 @@ module.exports = class GCETransport extends AbstractFileTransfer {
       })
       .then(channel => {
         this._channel = channel;
-        channel.interceptors.push({
-          request: (requestOptions) => {
-            requestOptions.uri = requestOptions.uri.replace(`${id}/`, '');
-            return requestOptions;
-          },
-        });
         return channel.metadata.resourceId;
       });
   }
