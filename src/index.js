@@ -30,6 +30,16 @@ ResumableUpload.prototype.makeRequest = function resumableUploadRequest(reqOpts,
     reqOpts.headers = headers;
   }
 
+  // add predefinedAcl query
+  if (this.metadata.predefinedAcl) {
+    let qs = reqOpts.qs;
+    if (!qs) {
+      qs = reqOpts.qs = {};
+    }
+
+    qs.predefinedAcl = this.metadata.predefinedAcl;
+  }
+
   makeRequest.call(this, reqOpts, function processResponse(err, resp, body) {
     if (err) {
       if (err instanceof Error) {
