@@ -32,12 +32,9 @@ ResumableUpload.prototype.makeRequest = function resumableUploadRequest(reqOpts,
 
   // add predefinedAcl query
   if (this.metadata.predefinedAcl) {
-    let qs = reqOpts.qs;
-    if (!qs) {
-      qs = reqOpts.qs = {};
-    }
-
+    const qs = reqOpts.qs || {};
     qs.predefinedAcl = this.metadata.predefinedAcl;
+    reqOpts.qs = qs;
   }
 
   makeRequest.call(this, reqOpts, function processResponse(err, resp, body) {
