@@ -1,12 +1,13 @@
 {
   "name": "ms-files-gce",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
     "compile": "./node_modules/.bin/babel -d ./lib ./src",
-    "prepublish": "npm run compile",
-    "test": "echo 'no test preset' && exit 1"
+    "prepublish": "npm run test && npm run compile",
+    "test": "npm run lint",
+    "lint": "eslint ./src"
   },
   "repository": {
     "type": "git",
@@ -21,8 +22,8 @@
   "dependencies": {
     "bl": "^1.1.2",
     "bluebird": "^3.3.3",
-    "gcloud": "^0.29.0",
-    "gcs-resumable-upload": "^0.4.1",
+    "gcloud": "^0.34.0",
+    "gcs-resumable-upload": "^0.6.0",
     "ms-files-transport": "^0.1.0"
   },
   "devDependencies": {
@@ -33,7 +34,8 @@
     "bunyan": "^1.7.1",
     "chai": "^3.5.0",
     "eslint": "^2.2.0",
-    "eslint-config-airbnb": "^6.0.2",
+    "eslint-config-airbnb-base": "^3.0.0",
+    "eslint-plugin-import": "^1.8.0",
     "eslint-plugin-mocha": "^2.0.0",
     "json": "^9.0.3",
     "mocha": "^2.4.5"
