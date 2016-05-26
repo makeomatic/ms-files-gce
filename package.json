@@ -1,6 +1,6 @@
 {
   "name": "ms-files-gce",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
