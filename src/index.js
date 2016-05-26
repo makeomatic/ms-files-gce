@@ -2,7 +2,6 @@ const Promise = require('bluebird');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
 const ResumableUpload = require('gcs-resumable-upload');
-const Errors = require('common-errors');
 const bl = require('bl');
 
 // do promisification
@@ -18,39 +17,6 @@ Promise.promisifyAll(require('gcloud/lib/storage').prototype, { multiArgs: true 
 
 // include gcloud
 const GStorage = require('gcloud/lib/storage');
-
-/**
- * Monkey patch module
- */
-const makeRequest = ResumableUpload.prototype.makeRequest;
-ResumableUpload.prototype.makeRequest = function resumableUploadRequest(reqOpts, callback) {
-  if (this.metadata.contentLength) {
-    const headers = reqOpts.headers || {};
-    headers['X-Upload-Content-Length'] = this.metadata.contentLength;
-    reqOpts.headers = headers;
-  }
-
-  // add predefinedAcl query
-  if (this.metadata.predefinedAcl) {
-    const qs = reqOpts.qs || {};
-    qs.predefinedAcl = this.metadata.predefinedAcl;
-    reqOpts.qs = qs;
-  }
-
-  makeRequest.call(this, reqOpts, function processResponse(err, resp, body) {
-    if (err) {
-      if (err instanceof Error) {
-        return callback(err);
-      }
-
-      const error = new Errors.Error(err.message);
-      Object.assign(error, err);
-      return callback(error);
-    }
-
-    return callback(null, resp, body);
-  });
-};
 
 /**
  * Main transport class
@@ -282,9 +248,10 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   initResumableUpload(opts) {
-    const { filename, metadata, generation } = opts;
+    const { filename, metadata, generation, ...props } = opts;
     this.log.debug('initiating resumable upload of %s', filename);
     const upload = new ResumableUpload({
+      ...props,
       authClient: this.bucket.storage.authClient,
       bucket: this.bucket.name,
       file: filename,
