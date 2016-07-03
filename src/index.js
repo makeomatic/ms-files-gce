@@ -216,10 +216,11 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   createSignedURL(opts) {
     this.log.debug('initiating signing of URL for %s', opts.resource);
     const { cname } = this;
-    const { action, md5, type, expires, extensionHeaders, resource } = opts;
+    const { action, md5, type, expires, extensionHeaders, resource, ...props } = opts;
 
     const file = this.bucket.file(resource);
     return file.getSignedUrlAsync({
+      ...props,
       action,
       expires,
       cname,
