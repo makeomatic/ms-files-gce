@@ -115,14 +115,8 @@ File.prototype.getSignedUrl = function getSignedUrl(_config, callback) {
   const name = encodeURIComponent(this.name);
   const targetGeneration = this.generation;
 
-  let host;
-  if (config.cname) {
-    host = config.cname;
-    config.resource = `/${name}`;
-  } else {
-    host = 'https://storage.googleapis.com';
-    config.resource = `/${this.bucket.name}/${name}`;
-  }
+  const host = config.cname || `https://storage.googleapis.com/${this.bucket.name}`;
+  config.resource = `/${this.bucket.name}/${name}`;
 
   this.storage.getCredentials((err, credentials) => {
     if (err) {
@@ -186,7 +180,7 @@ File.prototype.getSignedUrl = function getSignedUrl(_config, callback) {
     }
 
     callback(null, [
-      host + config.resource,
+      host + '/' + name,
       '?GoogleAccessId=' + credentials.client_email,
       '&Expires=' + expiresInSeconds,
       '&Signature=' + encodeURIComponent(signature),

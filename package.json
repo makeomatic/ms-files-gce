@@ -1,6 +1,6 @@
 {
   "name": "ms-files-gce",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
@@ -21,22 +21,22 @@
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
     "bl": "^1.1.2",
-    "bluebird": "^3.3.3",
+    "bluebird": "^3.4.1",
     "bunyan": "^1.8.1",
     "bunyan-noop": "^2.0.0",
-    "gcloud": "^0.35.0",
-    "gcs-resumable-upload": "^0.6.1",
+    "gcloud": "^0.36.0",
+    "gcs-resumable-upload": "^0.7.3",
     "ms-files-transport": "^0.1.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.6.0",
-    "babel-eslint": "^6.0.0",
+    "babel-cli": "^6.10.1",
+    "babel-eslint": "^6.1.0",
     "babel-preset-es2015": "^6.6.0",
     "babel-preset-stage-0": "^6.5.0",
     "chai": "^3.5.0",
     "eslint": "^2.11.1",
     "eslint-config-airbnb-base": "^3.0.0",
-    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-mocha": "^3.0.0",
     "json": "^9.0.4",
     "mocha": "^2.4.5"
