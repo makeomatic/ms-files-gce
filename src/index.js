@@ -2,13 +2,14 @@ const Promise = require('bluebird');
 const AbstractFileTransfer = require('ms-files-transport');
 const ld = require('lodash');
 const ResumableUpload = require('gcs-resumable-upload');
+const blackhole = require('bunyan-noop');
 const bl = require('bl');
 
 // do promisification
 Promise.promisifyAll(ResumableUpload.prototype);
 
 // single-arg
-Promise.promisifyAll(require('gcloud/lib/storage/file').prototype);
+Promise.promisifyAll(require('./monkey-patches/file').prototype);
 Promise.promisifyAll(require('gcloud/lib/storage/channel').prototype);
 
 // multi-args
@@ -50,16 +51,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
   constructor(opts = {}) {
     super();
     this._config = ld.merge({}, GCETransport.defaultOpts, opts);
-
-    if (this._config.logger) {
-      this._logger = this._config.logger;
-    } else {
-      ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].reduce((acc, act) => {
-        acc[act] = ld.noop;
-        return acc;
-      }, (this._logger = {}));
-    }
-
+    this._logger = this._config.logger || blackhole();
     this.setupGCE();
   }
 
@@ -223,13 +215,14 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   createSignedURL(opts) {
     this.log.debug('initiating signing of URL for %s', opts.resource);
-
+    const { cname } = this;
     const { action, md5, type, expires, extensionHeaders, resource } = opts;
 
     const file = this.bucket.file(resource);
     return file.getSignedUrlAsync({
       action,
       expires,
+      cname,
       contentMd5: md5,
       contentType: type,
       extensionHeaders,
