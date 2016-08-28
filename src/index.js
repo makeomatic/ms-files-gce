@@ -9,6 +9,7 @@ const bl = require('bl');
 Promise.promisifyAll(ResumableUpload.prototype);
 
 // single-arg
+Promise.promisifyAll(require('@google-cloud/storage/src/file').prototype);
 Promise.promisifyAll(require('@google-cloud/storage/src/channel').prototype);
 
 // multi-args
