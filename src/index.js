@@ -5,19 +5,18 @@ const ResumableUpload = require('gcs-resumable-upload');
 const blackhole = require('bunyan-noop');
 const bl = require('bl');
 
-// do promisification
+// for some reason it doesn't go through it if we just do the obj
 Promise.promisifyAll(ResumableUpload.prototype);
 
 // single-arg
-Promise.promisifyAll(require('./monkey-patches/file').prototype);
-Promise.promisifyAll(require('gcloud/lib/storage/channel').prototype);
+Promise.promisifyAll(require('@google-cloud/storage/src/channel').prototype);
 
 // multi-args
-Promise.promisifyAll(require('gcloud/lib/storage/bucket').prototype, { multiArgs: true });
-Promise.promisifyAll(require('gcloud/lib/storage').prototype, { multiArgs: true });
+Promise.promisifyAll(require('@google-cloud/storage/src/bucket').prototype, { multiArgs: true });
+Promise.promisifyAll(require('@google-cloud/storage').prototype, { multiArgs: true });
 
 // include gcloud
-const GStorage = require('gcloud/lib/storage');
+const GStorage = require('@google-cloud/storage');
 
 /**
  * Main transport class
@@ -112,8 +111,8 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    */
   stopChannel() {
     const channel = this._channel;
-    this.log.debug('destroying channel %j', channel && channel.metadata || '<noop>');
-    return channel && channel.stopAsync() || Promise.resolve();
+    this.log.debug('destroying channel %j', (channel && channel.metadata) || '<noop>');
+    return (channel && channel.stopAsync()) || Promise.resolve();
   }
 
   /**
