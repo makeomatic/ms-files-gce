@@ -5,9 +5,10 @@
   "main": "./lib/index.js",
   "scripts": {
     "compile": "./node_modules/.bin/babel -d ./lib ./src",
-    "prepublish": "npm run test && npm run compile",
+    "prepublish": "npm run snyk-protect && npm run test && npm run compile",
     "test": "npm run lint",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "snyk-protect": "snyk protect"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,8 @@
     "bunyan-noop": "^2.0.0",
     "gcs-resumable-upload": "^0.7.3",
     "lodash": "^4.15.0",
-    "ms-files-transport": "^1.0.1"
+    "ms-files-transport": "^1.0.1",
+    "snyk": "^1.19.1"
   },
   "devDependencies": {
     "babel-cli": "^6.10.1",
@@ -41,5 +43,6 @@
     "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-mocha": "^4.4.0",
     "json": "^9.0.4"
-  }
+  },
+  "snyk": true
 }
