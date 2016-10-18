@@ -85,11 +85,11 @@ module.exports = class GCETransport extends AbstractFileTransfer {
 
     return bucket
       .createChannelAsync(id, config)
-      .spread(channel => {
+      .spread((channel) => {
         this.log.debug('created channel %s', id);
         return channel;
       })
-      .catch({ code: 400 }, err => {
+      .catch({ code: 400 }, (err) => {
         if (ld.get(err, 'errors[0].reason') === 'channelIdNotUnique' && resourceId) {
           this.log.debug('found existing channel %s - %s', id, resourceId);
           return gcs.channel(id, resourceId);
@@ -97,11 +97,11 @@ module.exports = class GCETransport extends AbstractFileTransfer {
 
         throw err;
       })
-      .catch({ code: 401 }, err => {
+      .catch({ code: 401 }, (err) => {
         this.log.error('no rights to create channel', err);
         throw err;
       })
-      .then(channel => {
+      .then((channel) => {
         this._channel = channel;
         return channel.metadata.resourceId;
       });
@@ -158,7 +158,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     return Promise
       .bind(this)
       .then(this.createBucket)
-      .then(bucket => {
+      .then((bucket) => {
         this._bucket = bucket;
         return bucket;
       });
@@ -195,7 +195,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @param {Number} expires   This is the timestamp (represented as the number of miliseconds since the Unix Epoch of 00:00:00 UTC on January 1, 1970)
    *                            when the signature expires
    * @param {String} [extensionHeaders] :
-   *        									 You construct the Canonical Extension Headers portion of the message by concatenating all extension (custom) headers that begin
+   *                           You construct the Canonical Extension Headers portion of the message by concatenating all extension (custom) headers that begin
    *                           with x-goog-. However, you cannot perform a simple concatenation. You must concatenate the headers using the following process:
    *                           * Make all custom header names lowercase.
    *                           * Sort all custom headers by header name using a lexicographical sort by code point value.
@@ -273,7 +273,7 @@ module.exports = class GCETransport extends AbstractFileTransfer {
     const stream = file.createReadStream({ start: opts.start || 0, end: opts.end || undefined });
 
     // attach event handles if they are present
-    ['onError', 'onResponse', 'onData', 'onEnd'].forEach(opt => {
+    ['onError', 'onResponse', 'onData', 'onEnd'].forEach((opt) => {
       const thunk = opts[opt];
       if (typeof thunk === 'function') {
         stream.on(opt.slice(2).toLowerCase(), thunk);
@@ -322,10 +322,10 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    * @return {Promise}
    */
   readFile(filename, opts) {
-    return Promise.fromNode(next => {
+    return Promise.fromNode((next) => {
       let response = null;
       this.readFileStream(filename, opts)
-        .on('response', httpResponse => {
+        .on('response', (httpResponse) => {
           response = httpResponse;
         })
         .pipe(bl((err, contents) => {

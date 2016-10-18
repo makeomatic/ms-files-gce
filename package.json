@@ -1,6 +1,6 @@
 {
   "name": "ms-files-gce",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
@@ -21,27 +21,27 @@
   },
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
-    "@google-cloud/storage": "^0.1.1",
+    "@google-cloud/storage": "^0.3.0",
     "bl": "^1.1.2",
     "bluebird": "^3.4.3",
-    "bunyan": "^1.8.1",
+    "bunyan": "^1.8.2",
     "bunyan-noop": "^2.0.0",
-    "gcs-resumable-upload": "^0.7.3",
-    "lodash": "^4.15.0",
+    "gcs-resumable-upload": "^0.7.4",
+    "lodash": "^4.16.4",
     "ms-files-transport": "^1.0.1",
     "snyk": "^1.19.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.10.1",
-    "babel-eslint": "^6.1.0",
-    "babel-plugin-transform-class-properties": "^6.11.5",
-    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
-    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-cli": "^6.16.0",
+    "babel-eslint": "^7.0.0",
+    "babel-plugin-transform-class-properties": "^6.16.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.16.0",
+    "babel-plugin-transform-object-rest-spread": "^6.16.0",
     "babel-plugin-transform-strict-mode": "^6.11.3",
-    "eslint": "^3.4.0",
-    "eslint-config-airbnb-base": "^5.0.3",
-    "eslint-plugin-import": "^1.10.0",
-    "eslint-plugin-mocha": "^4.4.0",
+    "eslint": "^3.8.1",
+    "eslint-config-airbnb-base": "^9.0.0",
+    "eslint-plugin-import": "^2.0.1",
+    "eslint-plugin-mocha": "^4.7.0",
     "json": "^9.0.4"
   },
   "snyk": true
