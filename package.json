@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/makeomatic/ms-files-gce#readme",
   "dependencies": {
-    "@google-cloud/storage": "^0.6.0",
+    "@google-cloud/storage": "^0.7.0",
     "bl": "^1.2.0",
     "bluebird": "^3.4.7",
     "bunyan": "^1.8.5",
