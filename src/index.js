@@ -183,34 +183,36 @@ module.exports = class GCETransport extends AbstractFileTransfer {
    *                          * If the bucket name appears in the Host header, add a slash and the bucket name to the string (for example,
    *                          /example-travel-maps). If the bucket name appears in the path portion of the HTTP request, do nothing.
    *                          * Add the path portion of the HTTP request to the string, excluding any query string parameters. For example,
-   *                          if the path is /europe/france/paris.jpg?cors and you already added the bucket example-travel-maps to the string, then you need
-   *                          to add /europe/france/paris.jpg to the string.
+   *                          if the path is /europe/france/paris.jpg?cors and you already added the bucket example-travel-maps to the string,
+   *                          then you need to add /europe/france/paris.jpg to the string.
    *                          * If the request is scoped to a subresource, such as ?cors, add this subresource to the string, including the
    *                          question mark.
    *                          * Be sure to copy the HTTP request path literally: that is, you should include all URL encoding (percent signs)
    *                          in the string that you create. Also, be sure that you include only query string parameters that designate
-   *                          subresources (such as cors). You should not include query string parameters such as ?prefix, ?max-keys, ?marker, and ?delimiter.
+   *                          subresources (such as cors). You should not include query string parameters such as ?prefix,
+   *                          ?max-keys, ?marker, and ?delimiter.
    * @param {String} [md5] - md5 digest of content - Optional. The MD5 digest value in base64. If you provide this in the string,
    *                 the client (usually a browser) must provide this HTTP header with this same value in its request.
-   * @param {Number} expires   This is the timestamp (represented as the number of miliseconds since the Unix Epoch of 00:00:00 UTC on January 1, 1970)
-   *                            when the signature expires
+   * @param {Number} expires   This is the timestamp (represented as the number of miliseconds since the Unix Epoch
+   *                           of 00:00:00 UTC on January 1, 1970) when the signature expires
    * @param {String} [extensionHeaders] :
-   *                           You construct the Canonical Extension Headers portion of the message by concatenating all extension (custom) headers that begin
-   *                           with x-goog-. However, you cannot perform a simple concatenation. You must concatenate the headers using the following process:
+   *                           You construct the Canonical Extension Headers portion of the message by concatenating all extension
+   *                           (custom) headers that begin with x-goog-. However, you cannot perform a simple concatenation.
+   *                           You must concatenate the headers using the following process:
    *                           * Make all custom header names lowercase.
    *                           * Sort all custom headers by header name using a lexicographical sort by code point value.
-   *                           * Eliminate duplicate header names by creating one header name with a comma-separated list of values. Be sure there is no
-   *                           whitespace between the values and be sure that the order of the comma-separated list matches the order that the headers
-   *                           appear in your request. For more information, see RFC 2616 section 4.2.
-   *                           * Replace any folding whitespace or newlines (CRLF or LF) with a single space. For more information about folding whitespace,
-   *                           see RFC 2822 section 2.2.3.
+   *                           * Eliminate duplicate header names by creating one header name with a comma-separated list of values.
+   *                           Be sure there is no whitespace between the values and be sure that the order of the comma-separated
+   *                           list matches the order that the headers appear in your request. For more information, see RFC 2616 section 4.2.
+   *                           * Replace any folding whitespace or newlines (CRLF or LF) with a single space. For more
+   *                           information about folding whitespace, see RFC 2822 section 2.2.3.
    *                           * Remove any whitespace around the colon that appears after the header name.
    *                           * Append a newline (U+000A) to each custom header.
    *                           * Concatenate all custom headers.
-   *                           Important: You must use both the header name and the header value when you construct the Canonical Extension Headers portion
-   *                           of the query string. Be sure to remove any whitespace around the colon that separates the header name and value.
-   *                           For example, using the custom header x-goog-acl: private without removing the space after the colon will return a
-   *                           403 Forbidden because the request signature you calculate will not match the signature Google calculates.
+   *                           Important: You must use both the header name and the header value when you construct the Canonical Extension Headers
+   *                           portion of the query string. Be sure to remove any whitespace around the colon that separates the header name and
+   *                           value. For example, using the custom header x-goog-acl: private without removing the space after the colon will
+   *                           return a 403 Forbidden because the request signature you calculate will not match the signature Google calculates.
    * @return {Promise}
    */
   createSignedURL(opts) {
