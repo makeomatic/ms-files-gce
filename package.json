@@ -4,7 +4,7 @@
   "description": "Abstract file transport for s3-like APIs",
   "main": "./lib/index.js",
   "scripts": {
-    "compile": "./node_modules/.bin/babel -d ./lib ./src",
+    "compile": "babel -d ./lib ./src",
     "prepublish": "npm run snyk-protect && npm run test && npm run compile",
     "test": "npm run lint",
     "lint": "eslint ./src",
@@ -28,8 +28,7 @@
     "bunyan-noop": "^2.0.0",
     "gcs-resumable-upload": "^0.7.4",
     "lodash": "^4.17.3",
-    "ms-files-transport": "^1.0.2",
-    "snyk": "^1.25.2"
+    "ms-files-transport": "^1.0.2"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
@@ -41,7 +40,8 @@
     "eslint-config-makeomatic": "^1.0.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-promise": "^3.5.0",
-    "json": "^9.0.6"
+    "json": "^9.0.6",
+    "snyk": "^1.25.2"
   },
   "engines": {
     "node": ">= 7.6.0",
