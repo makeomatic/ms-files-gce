@@ -1,5 +1,7 @@
 # ms-files-gce
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/makeomatic/ms-files-gce.svg)](https://greenkeeper.io/)
+
 google cloud storage adapter for ms-files
 
 ## Considerations
