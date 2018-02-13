@@ -28,7 +28,8 @@
     "bunyan-noop": "^2.0.0",
     "gcs-resumable-upload": "^0.7.4",
     "lodash": "^4.17.3",
-    "ms-files-transport": "^1.0.2"
+    "ms-files-transport": "^1.0.2",
+    "snyk": "^1.69.7"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
@@ -40,8 +41,7 @@
     "eslint-config-makeomatic": "^1.0.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-promise": "^3.5.0",
-    "json": "^9.0.6",
-    "snyk": "^1.25.2"
+    "json": "^9.0.6"
   },
   "engines": {
     "node": ">= 7.6.0",
