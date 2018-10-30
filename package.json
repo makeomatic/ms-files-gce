@@ -26,7 +26,7 @@
     "bluebird": "^3.5.0",
     "bunyan": "^1.8.8",
     "bunyan-noop": "^2.0.0",
-    "gcs-resumable-upload": "^0.7.4",
+    "gcs-resumable-upload": "^0.8.1",
     "lodash": "^4.17.3",
     "ms-files-transport": "^1.0.2"
   },
